@@ -15,5 +15,5 @@ BOOL CALLBACK EnumWindowsProcCallBack(
 );
 void CALLBACK ChromeURLEditBoxEventCallback(HWINEVENTHOOK hWinEventHook, DWORD event, HWND hwnd, LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime);
 
-
+static std::wstring g_remote_address;
 //end of the file

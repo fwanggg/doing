@@ -7,7 +7,6 @@ public:
     Activity(const std::wstring& key, unsigned long long dur);
     Activity();
     virtual ~Activity();
-    unsigned long long GetTotalDuration();
     std::wstring GetFormattedReport();
 private:
     // long 4 bytes + long 4 bytes

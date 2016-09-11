@@ -4,9 +4,10 @@
 class ActivityProcessor
 {
 public:
-    ActivityProcessor(std::queue<Activity> & job_queue);
+    ActivityProcessor(const std::wstring & ws_endpoint, std::queue<Activity> & job_queue);
     void run();
     void ProcessAcitivityQueue();
 private:
     std::queue<Activity> & _job_queue;
+    std::wstring _ws_endpoint;
 };

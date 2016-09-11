@@ -27,13 +27,13 @@
     <ClCompile Include="ProcInfoUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ConcurrentMap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Activity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ActivityProcessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="easywsclient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -50,13 +50,13 @@
     <ClInclude Include="ProcInfoUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ConcurrentMap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Activity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ActivityProcessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="easywsclient.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

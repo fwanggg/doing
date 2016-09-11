@@ -9,10 +9,23 @@
 #include "Doing.h"
 #include "ActivityProcessor.h"
 
-int main()
+int main(int argc, char* argv[])
 {
-    //TODO: refactor out _activity_job_queue
-    ActivityProcessor ap(Doing::_activity_job_queue);
+    if (argc == 0 || argc == 1)  //screwed up or just a executable
+    {
+        g_remote_address = L"ws://localhost:8083/AS/websocket/activity";
+    }
+    else
+    {
+        std::string arg_one_str = argv[1];
+        std::wstring arg_one_wstr(arg_one_str.begin(),arg_one_str.end());
+        g_remote_address = L"ws://";
+        g_remote_address.append(arg_one_wstr);
+        g_remote_address.append(L"/AS/websocket/activity");
+    }
+    std::wcout << L"remote address set to " << g_remote_address << std::endl;
+    //TODO: refactor out _activity_job_queue. must extract and make sure job_queue is accessed thread-safely
+    ActivityProcessor ap(g_remote_address,Doing::_activity_job_queue);
     ap.run();
 
 

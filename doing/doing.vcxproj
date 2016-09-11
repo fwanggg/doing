@@ -116,8 +116,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ActivityProcessor.cpp" />
-    <ClCompile Include="ConcurrentMap.cpp" />
     <ClCompile Include="Doing.cpp" />
+    <ClCompile Include="easywsclient.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Activity.cpp" />
     <ClCompile Include="ProcInfoUtil.cpp" />
@@ -125,8 +125,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ActivityProcessor.h" />
-    <ClInclude Include="ConcurrentMap.h" />
     <ClInclude Include="Doing.h" />
+    <ClInclude Include="easywsclient.hpp" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Activity.h" />
     <ClInclude Include="ProcInfoUtil.h" />
