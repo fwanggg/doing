@@ -30,10 +30,19 @@
     <ClCompile Include="Activity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="easywsclient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ConcurrentQueue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WsActivityProcessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="ActivityProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="easywsclient.cpp">
+    <ClCompile Include="ConsoleActivityProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,10 +62,19 @@
     <ClInclude Include="Activity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="easywsclient.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConcurrentQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WsActivityProcessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="ActivityProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="easywsclient.hpp">
+    <ClInclude Include="ConsoleActivityProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

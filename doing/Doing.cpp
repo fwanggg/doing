@@ -11,7 +11,7 @@
 #include <ctime>
 #include <thread>
 #include <chrono>
-Doing::Doing()
+Doing::Doing(ConcurrentQueue<Activity>& ptr_map) : _job_queue(ptr_map)
 {
     ::CoInitialize(NULL);
 }
@@ -62,16 +62,14 @@ void Doing::Sample()
                             //2. get duration and create a activity
                             _acitive_duration += ms.count() - _last_time;
                             Activity activity(_last_metric_key, _acitive_duration);
-                            _job_queue_lock.lock();
-                            if (_activity_job_queue.size() < 1000)
+                            if (_job_queue.GetSize() < 1000)
                             {
-                                Doing::_activity_job_queue.push(activity);
+                                _job_queue.Push(activity);
                             }
                             else
                             {
                                 //fucked
                             }
-                            _job_queue_lock.unlock();
 
                             //update the global single threaded variables
                             _acitive_duration = 0;
@@ -100,10 +98,10 @@ void Doing::Sample()
         Sleep(500);
     }
 }
-void Doing::Monitor() const
+void Doing::Monitor()
 {
-    std::thread t_sampling(Doing::Sample);
-    t_sampling.join();
+    std::thread t_sampling(&Doing::Sample,this);
+    t_sampling.detach();
 }
 Doing::~Doing()
 {
@@ -152,22 +150,4 @@ std::wstring Doing::ReportUrlByHandle(const HWND hwnd)
     }
     return val_std_str;
 }
-
-void CALLBACK Doing::WinEventProcCallback(
-    HWINEVENTHOOK hWinEventHook,
-    DWORD         event,
-    HWND          hwnd,
-    LONG          idObject,
-    LONG          idChild,
-    DWORD         dwEventThread,
-    DWORD         dwmsEventTime
-)
-{
-}
-std::queue<Activity> Doing::_activity_job_queue;
-std::mutex Doing::_job_queue_lock;
-Activity* Doing::s_current_metric = nullptr;
-unsigned long long Doing::_last_time = 0;
-unsigned long long Doing::_acitive_duration = 0;
-std::wstring Doing::_last_metric_key;
 //end of the file

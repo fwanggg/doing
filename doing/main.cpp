@@ -7,31 +7,77 @@
 #include <UIAutomationClient.h>
 #include "StringUtil.h"
 #include "Doing.h"
-#include "ActivityProcessor.h"
+#include "WsActivityProcessor.h"
+#include "ConsoleActivityProcessor.h"
+#include <memory>
+
+void PrintHelp() 
+{
+    printf("Args not recognized.\n\n\n");
+    printf("Allowed arguments:\n");
+    printf("\t-console\t\t\toutput acitivies to console.\n");
+    printf("\t-remote URL\t\t\testablish websocket connection with URL provided and stream the activities to remote server.\n");
+}
 
 int main(int argc, char* argv[])
 {
     if (argc == 0 || argc == 1)  //screwed up or just a executable
     {
-        g_remote_address = L"ws://localhost:8083/AS/websocket/activity";
+        //bad commandline
+        PrintHelp();
     }
     else
     {
-        std::string arg_one_str = argv[1];
-        std::wstring arg_one_wstr(arg_one_str.begin(),arg_one_str.end());
-        g_remote_address = L"ws://";
-        g_remote_address.append(arg_one_wstr);
-        g_remote_address.append(L"/AS/websocket/activity");
+        bool shouldStart = false;
+        std::string arg_opt = argv[1];
+        if (arg_opt == "-console" && argc == 2)
+        {
+            //write to console
+            g_to_console = true;
+            shouldStart = true;
+        }
+        else if(arg_opt == "-remote" && argc == 3)
+        {
+            //talk to remote server
+            //now we expect server url
+            std::string arg_one_str = argv[2];
+            std::wstring arg_one_wstr(arg_one_str.begin(), arg_one_str.end());
+            g_remote_address = L"ws://";
+            g_remote_address.append(arg_one_wstr);
+            g_remote_address.append(L"/AS/websocket/activity");
+            std::wcout << L"remote address set to " << g_remote_address << std::endl;
+            shouldStart = true;
+        }
+        if (shouldStart)
+        {
+            //create the job queue
+            ConcurrentQueue<Activity> job_queue;
+            ActivityProcessor* ptr_ap = nullptr; // lifetime is same as the process no need to delete atm
+            if (g_to_console)
+            {
+                ptr_ap = new ConsoleActivityProcessor(job_queue);
+            }
+            else
+            {
+                ptr_ap = new WsActivityProcessor(g_remote_address, job_queue);
+            }
+            ptr_ap->RunThread();
+            //start producer thread and pass in job queue
+            Doing doing(job_queue);
+            doing.Monitor();//and detach
+#ifdef _WIN32
+            Sleep(INFINITE);
+#else
+#endif
+        }
+        else
+        {
+            PrintHelp();
+        }
     }
-    std::wcout << L"remote address set to " << g_remote_address << std::endl;
-    //TODO: refactor out _activity_job_queue. must extract and make sure job_queue is accessed thread-safely
-    ActivityProcessor ap(g_remote_address,Doing::_activity_job_queue);
-    ap.run();
+    
 
-
-
-    Doing doing;
-    doing.Monitor();
+    
 }
 
 /*void CALLBACK ChromeURLEditBoxEventCallback(HWINEVENTHOOK hWinEventHook, DWORD event, HWND hwnd, LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime) {

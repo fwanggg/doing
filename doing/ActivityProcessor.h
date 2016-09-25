@@ -1,13 +1,13 @@
 #pragma once
-#include <queue>
+#include "ConcurrentQueue.h"
 #include "Activity.h"
 class ActivityProcessor
 {
 public:
-    ActivityProcessor(const std::wstring & ws_endpoint, std::queue<Activity> & job_queue);
-    void run();
-    void ProcessAcitivityQueue();
-private:
-    std::queue<Activity> & _job_queue;
-    std::wstring _ws_endpoint;
+    virtual void ProcessAcitivityQueue() = 0;
+    virtual void RunThread() = 0;
+    virtual ~ActivityProcessor();
+    ActivityProcessor(ConcurrentQueue<Activity>& _job_queue);
+protected:
+    ConcurrentQueue<Activity>&  m_job_queue;
 };
