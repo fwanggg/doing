@@ -1,7 +1,7 @@
 #include "Doing.h"
 #include <Windows.h>
 #include <string>
-#include "ProcInfoUtil.h"
+#include "Win32Util.h"
 #include <oleacc.h>
 #include <iostream>
 #include <atlbase.h>
@@ -14,6 +14,8 @@
 Doing::Doing(ConcurrentQueue<Activity>& ptr_map) : _job_queue(ptr_map)
 {
     ::CoInitialize(NULL);
+    _machine_name = Win32Util<std::wstring>::GetMachineName();
+
 }
 void Doing::StartReportActivities() const
 {
@@ -35,50 +37,61 @@ void Doing::Sample()
                 {
                     if (!(pid == GetCurrentProcessId()))
                     {
-                        std::wstring name = ProcInfoUtil<std::wstring>::GetProcName(pid);
+                        std::wstring proc_name = Win32Util<std::wstring>::GetProcName(pid);
                         //1. get key of the activity
-                        std::wstring key = name; //default key
-                        wchar_t win_text[1024] = { 0 };
-                        GetWindowText(hwnd, win_text, 1024);
-                        if (name.compare(L"chrome.exe") == 0)
+                        std::wstring key = proc_name; //default key
+                        std::wstring url;
+                        std::wstring window_title = Win32Util<std::wstring>::GetWindowTitleByHandle(hwnd);
+                        if (proc_name.compare(L"chrome.exe") == 0)
                         {
+                            url = ReportUrlByHandle(hwnd);
                             key.append(L"@@@@@@");
-                            key.append(ReportUrlByHandle(hwnd));
-                            key.append(L"~");//url won't have this 
-                            key.append(win_text);
+                            key.append(url);
+                            key.append(L"@@@@@@");//url won't have this 
+                            key.append(window_title);
                         }
                         else
                         {
                             key.append(L"@@@@@@");
-                            key.append(win_text);
+                            key.append(window_title);
                         }
 
                         if (_last_metric_key.empty()) // first time
                         {
                             _last_metric_key = key;
                         }
-                        else if (key.compare(_last_metric_key) != 0) //only when activity changes do we generate a activity
-                        {
-                            //2. get duration and create a activity
-                            _acitive_duration += ms.count() - _last_time;
-                            Activity activity(_last_metric_key, _acitive_duration);
-                            if (_job_queue.GetSize() < 1000)
-                            {
-                                _job_queue.Push(activity);
-                            }
-                            else
-                            {
-                                //fucked
-                            }
-
-                            //update the global single threaded variables
-                            _acitive_duration = 0;
-                            _last_metric_key = key;
-                        }
                         else
                         {
                             //if this is still the same activity, increase the duration
                             _acitive_duration += ms.count() - _last_time;
+                            if (key.compare(_last_metric_key) != 0) //only when activity changes do we generate a activity
+                            {
+                                Activity activity(_acitive_duration,
+                                    ms.count(),
+                                    _machine_name,
+                                    proc_name);
+                                if (!url.empty())
+                                {
+                                    activity.SetUrl(url);
+                                }
+                                if (!window_title.empty())
+                                {
+                                    activity.SetTile(window_title);
+                                }
+                                if (_job_queue.GetSize() < 1000)
+                                {
+                                    _job_queue.Push(activity);
+                                }
+                                else
+                                {
+                                    //fucked
+                                }
+
+                                //update the global single threaded variables
+                                _acitive_duration = 0;
+                                _last_metric_key = key;
+                            }
+                            
                         }
                     }
                 }

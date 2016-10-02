@@ -123,19 +123,20 @@
     <ClCompile Include="easywsclient.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Activity.cpp" />
-    <ClCompile Include="ProcInfoUtil.cpp" />
+    <ClCompile Include="Win32Util.cpp" />
     <ClCompile Include="StringUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ActivityProcessor.h" />
     <ClInclude Include="ConsoleActivityProcessor.h" />
+    <ClInclude Include="Types.h" />
     <ClInclude Include="WsActivityProcessor.h" />
     <ClInclude Include="ConcurrentQueue.h" />
     <ClInclude Include="Doing.h" />
     <ClInclude Include="easywsclient.hpp" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Activity.h" />
-    <ClInclude Include="ProcInfoUtil.h" />
+    <ClInclude Include="Win32Util.h" />
     <ClInclude Include="StringUtil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

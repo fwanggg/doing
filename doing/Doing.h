@@ -20,10 +20,10 @@ private:
     Doing();
     ConcurrentQueue<Activity>& _job_queue;
     std::wstring _last_metric_key;
-    unsigned long long _acitive_duration;
+    unsigned long long _acitive_duration = 0;
     void Sample();
     std::wstring ReportUrlByHandle(const HWND hwnd);
-    //static ProcActivityMap s_metric_map;
-    
-    unsigned long long _last_time;
+    unsigned long long _last_time = 0;
+    //machine  name
+    std::wstring _machine_name;
 };

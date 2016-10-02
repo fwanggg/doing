@@ -1,6 +1,6 @@
 #include "main.h"
 #include <stdio.h>
-#include "ProcInfoUtil.h"
+#include "Win32Util.h"
 #include <oleacc.h>
 #include <iostream>
 #include <atlbase.h>
