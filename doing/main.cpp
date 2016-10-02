@@ -42,9 +42,9 @@ int main(int argc, char* argv[])
             //now we expect server url
             std::string arg_one_str = argv[2];
             std::wstring arg_one_wstr(arg_one_str.begin(), arg_one_str.end());
-            g_remote_address = L"ws://";
+            //g_remote_address = L"ws://";
             g_remote_address.append(arg_one_wstr);
-            g_remote_address.append(L"/AS/websocket/activity");
+            //g_remote_address.append(L"/AS/websocket/activity");
             std::wcout << L"remote address set to " << g_remote_address << std::endl;
             shouldStart = true;
         }

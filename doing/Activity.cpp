@@ -23,9 +23,10 @@ Activity::Activity(const _doing_int64 dur,
 {}
 std::wstring Activity::GetFormattedReport() const
 {
+    //agent_id@@@@@p_name@@@@@window_text@@@@@url@@@@@duration@@@@@datetime
     std::wstringstream wss;
-    wss << _machine_name << L"@@@@@" << _total_duration << L"@@@@@" << _time_stamp
-        << L"@@@@@" << _url << L"@@@@@" << _window_title << L"@@@@@" << _proc_name << std::endl;
+    wss << _machine_name << L"@@@@@" << _proc_name << L"@@@@@" << _window_title
+        << L"@@@@@" << _url << L"@@@@@" << _total_duration << L"@@@@@" << _time_stamp;
     return wss.str();
 
 }
