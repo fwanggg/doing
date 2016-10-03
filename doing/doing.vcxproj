@@ -81,6 +81,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>oleacc.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -107,6 +108,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -117,6 +119,7 @@
   <ItemGroup>
     <ClCompile Include="ActivityProcessor.cpp" />
     <ClCompile Include="ConsoleActivityProcessor.cpp" />
+    <ClCompile Include="SimpleLogger.cpp" />
     <ClCompile Include="WsActivityProcessor.cpp" />
     <ClCompile Include="ConcurrentQueue.cpp" />
     <ClCompile Include="Doing.cpp" />
@@ -129,6 +132,7 @@
   <ItemGroup>
     <ClInclude Include="ActivityProcessor.h" />
     <ClInclude Include="ConsoleActivityProcessor.h" />
+    <ClInclude Include="SimpleLogger.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="WsActivityProcessor.h" />
     <ClInclude Include="ConcurrentQueue.h" />
