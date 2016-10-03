@@ -2,9 +2,15 @@
 #pragma once
 #include <string>
 #include <atlbase.h>
-template <typename T> class StringUtilBase
+class StringUtilBase
 {
 public:
-    static T BSTR2StdString(const BSTR bs);
+    static std::wstring BSTR2StdString(const BSTR bs);
+    static std::string ConvertUnicodeToUTF8(std::wstring unicode_str);
+private:
+    static bool ConvertUnicodeToUTF8(
+        LPCWSTR szWideCmdLine,
+        LPSTR*  pszBuffer
+    );
 };
 #endif

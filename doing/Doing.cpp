@@ -157,7 +157,7 @@ std::wstring Doing::ReportUrlByHandle(const HWND hwnd)
                         pFound->get_CurrentName(&name);
                         pFound->GetCurrentPatternAs(UIA_ValuePatternId, __uuidof(IUIAutomationValuePattern), (void**)&ptr_val_pattern);
                         ptr_val_pattern->get_CurrentValue(&val);
-                        val_std_str = StringUtilBase<std::wstring>::BSTR2StdString(val);
+                        val_std_str = StringUtilBase::BSTR2StdString(val);
                         //std::wstring name_std_str = StringUtilBase<std::wstring>::BSTR2StdString(name);
                         pFound->Release();
                     }
