@@ -23,6 +23,8 @@ void Doing::StartReportActivities() const
 void Doing::Sample()
 {
     ::CoInitialize(NULL);
+    std::wstring last_url;
+    std::wstring last_window_text;
     while (true)
     {
         std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -59,6 +61,8 @@ void Doing::Sample()
                         if (_last_metric_key.empty()) // first time
                         {
                             _last_metric_key = key;
+                            last_url = url;
+                            last_window_text = window_title;
                         }
                         else
                         {
@@ -72,11 +76,11 @@ void Doing::Sample()
                                     proc_name);
                                 if (!url.empty())
                                 {
-                                    activity.SetUrl(url);
+                                    activity.SetUrl(last_url);
                                 }
                                 if (!window_title.empty())
                                 {
-                                    activity.SetTile(window_title);
+                                    activity.SetTile(last_window_text);
                                 }
                                 if (_job_queue.GetSize() < 1000)
                                 {
@@ -90,6 +94,8 @@ void Doing::Sample()
                                 //update the global single threaded variables
                                 _acitive_duration = 0;
                                 _last_metric_key = key;
+                                last_url = url;
+                                last_window_text = window_title;
                             }
                             
                         }
