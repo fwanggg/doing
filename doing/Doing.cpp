@@ -25,6 +25,7 @@ void Doing::Sample()
     ::CoInitialize(NULL);
     std::wstring last_url;
     std::wstring last_window_text;
+    std::wstring last_proc_name;
     while (true)
     {
         std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -63,6 +64,7 @@ void Doing::Sample()
                             _last_metric_key = key;
                             last_url = url;
                             last_window_text = window_title;
+                            last_proc_name = proc_name;
                         }
                         else
                         {
@@ -73,7 +75,7 @@ void Doing::Sample()
                                 Activity activity(_acitive_duration,
                                     ms.count(),
                                     _machine_name,
-                                    proc_name);
+                                    last_proc_name);
                                 if (!url.empty())
                                 {
                                     activity.SetUrl(last_url);
@@ -96,6 +98,7 @@ void Doing::Sample()
                                 _last_metric_key = key;
                                 last_url = url;
                                 last_window_text = window_title;
+                                last_proc_name = proc_name;
                             }
                             
                         }
