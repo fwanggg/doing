@@ -84,14 +84,7 @@ void Doing::Sample()
                                 {
                                     activity.SetTile(last_window_text);
                                 }
-                                if (_job_queue.GetSize() < 1000)
-                                {
-                                    _job_queue.Push(activity);
-                                }
-                                else
-                                {
-                                    //fucked
-                                }
+                                _job_queue.Push(activity);                                
 
                                 //update the global single threaded variables
                                 _acitive_duration = 0;

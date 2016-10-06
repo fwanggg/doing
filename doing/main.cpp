@@ -50,8 +50,8 @@ int main(int argc, char* argv[])
         }
         if (shouldStart)
         {
-            //create the job queue
-            ConcurrentQueue<Activity> job_queue;
+            //create the job queue, max jobs waiting to be processed limit to 1000
+            ConcurrentQueue<Activity> job_queue(1000);
             ActivityProcessor* ptr_ap = nullptr; // lifetime is same as the process no need to delete atm
             if (g_to_console)
             {

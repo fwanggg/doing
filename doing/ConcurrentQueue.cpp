@@ -15,7 +15,11 @@ template<typename K> size_t ConcurrentQueue<K>::GetSize()
 template<typename K> void ConcurrentQueue<K>::Push(K& val)
 {
     std::lock_guard<std::mutex> lock(_queue_lock);
-    _queue.push(val);
+    if (_queue.size() < _size)
+    {
+        _queue.push(val);
+    }
+    //else don't anything yet
 }
 
 //In order for the compiler to generate the code, it must see both the template definition (not just declaration) 
