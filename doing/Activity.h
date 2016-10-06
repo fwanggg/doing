@@ -2,15 +2,14 @@
 #include <string>
 #include "Types.h"
 #include <vector>
+#include "ActivityKey.h"
 class Activity
 {
 public:
     Activity(const _doing_int64 dur,
         const _doing_int64 time_stamp,
         const std::wstring machine_name,
-        const std::wstring proc_name);
-    void SetUrl(std::wstring url);
-    void SetTile(std::wstring title);
+        const ActivityKey& key);
     virtual ~Activity();
     std::wstring GetFormattedReport() const;
     std::wstring GetKey() const;

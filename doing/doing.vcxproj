@@ -130,6 +130,7 @@
     <ClCompile Include="StringUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ActivityKey.h" />
     <ClInclude Include="ActivityProcessor.h" />
     <ClInclude Include="ConsoleActivityProcessor.h" />
     <ClInclude Include="SimpleLogger.h" />

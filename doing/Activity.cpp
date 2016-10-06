@@ -2,25 +2,18 @@
 #include <iostream>
 #include <sstream>
 
-void Activity::SetUrl(std::wstring url)
-{
-    _url = url;
-}
-void Activity::SetTile(std::wstring title)
-{
-    _window_title = title;
-}
 Activity::Activity(const _doing_int64 dur,
     const _doing_int64 time_stamp,
     const std::wstring machine_name,
-    const std::wstring proc_name):
+    const ActivityKey& key):
     _total_duration(dur),
     _time_stamp(time_stamp),
     _machine_name(machine_name),
-    _proc_name(proc_name),
-    _url(L"null"),
-    _window_title(L"null")
-{}
+    _proc_name(key.proc_name), //this shall not be empty and should not be empty
+    _url(key.url.empty()?L"null":key.url),
+    _window_title(key.window_text.empty() ? L"null" : key.window_text)
+{
+}
 std::wstring Activity::GetFormattedReport() const
 {
     //agent_id@@@@@p_name@@@@@window_text@@@@@url@@@@@duration@@@@@datetime

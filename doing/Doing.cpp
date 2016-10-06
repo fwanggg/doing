@@ -11,6 +11,7 @@
 #include <ctime>
 #include <thread>
 #include <chrono>
+#include "ActivityKey.h"
 Doing::Doing(ConcurrentQueue<Activity>& ptr_map) : _job_queue(ptr_map)
 {
     ::CoInitialize(NULL);
@@ -23,11 +24,10 @@ void Doing::StartReportActivities() const
 void Doing::Sample()
 {
     ::CoInitialize(NULL);
-    std::wstring last_url;
-    std::wstring last_window_text;
-    std::wstring last_proc_name;
+    ActivityKey prev_key;
     while (true)
     {
+        ActivityKey cur_key;
         std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch());
         if (_last_time != 0)
@@ -40,58 +40,38 @@ void Doing::Sample()
                 {
                     if (!(pid == GetCurrentProcessId()))
                     {
-                        std::wstring proc_name = Win32Util<std::wstring>::GetProcName(pid);
+                        cur_key.proc_name = Win32Util<std::wstring>::GetProcName(pid);;
                         //1. get key of the activity
-                        std::wstring key = proc_name; //default key
                         std::wstring url;
-                        std::wstring window_title = Win32Util<std::wstring>::GetWindowTitleByHandle(hwnd);
-                        if (proc_name.compare(L"chrome.exe") == 0)
+                        cur_key.window_text = Win32Util<std::wstring>::GetWindowTitleByHandle(hwnd);
+                        if (cur_key.proc_name.compare(L"chrome.exe") == 0)
                         {
-                            url = ReportUrlByHandle(hwnd);
-                            key.append(L"@@@@@@");
-                            key.append(url);
-                            key.append(L"@@@@@@");//url won't have this 
-                            key.append(window_title);
-                        }
-                        else
-                        {
-                            key.append(L"@@@@@@");
-                            key.append(window_title);
+                            cur_key.url = ReportUrlByHandle(hwnd);
                         }
 
-                        if (_last_metric_key.empty()) // first time
+                        //creates key internally
+                        //as of this step, the internal data members should all be set
+                        cur_key.GenerateKey();
+
+                        if (prev_key.IsEmpty()) // first time
                         {
-                            _last_metric_key = key;
-                            last_url = url;
-                            last_window_text = window_title;
-                            last_proc_name = proc_name;
+                            prev_key = cur_key; //copy constructor
                         }
                         else
                         {
                             //if this is still the same activity, increase the duration
                             _acitive_duration += ms.count() - _last_time;
-                            if (key.compare(_last_metric_key) != 0) //only when activity changes do we generate a activity
+                            if (cur_key != prev_key) //only when activity changes do we generate a activity
                             {
                                 Activity activity(_acitive_duration,
                                     ms.count(),
                                     _machine_name,
-                                    last_proc_name);
-                                if (!url.empty())
-                                {
-                                    activity.SetUrl(last_url);
-                                }
-                                if (!window_title.empty())
-                                {
-                                    activity.SetTile(last_window_text);
-                                }
+                                    prev_key);
                                 _job_queue.Push(activity);                                
 
                                 //update the global single threaded variables
                                 _acitive_duration = 0;
-                                _last_metric_key = key;
-                                last_url = url;
-                                last_window_text = window_title;
-                                last_proc_name = proc_name;
+                                prev_key = cur_key;
                             }
                             
                         }
