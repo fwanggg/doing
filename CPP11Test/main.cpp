@@ -2,6 +2,17 @@
 #include <queue>
 #include "Main.h"
 #include <string>
+
+bool generateBool()
+{
+    printf("generateBool called\n");
+    return false;
+}
+void testStatic()
+{
+    static bool abc = generateBool();
+}
+
 std::wstring test_str(L"123");
 
 /*
@@ -42,6 +53,15 @@ int main()
     
     //ex 2, changing reference returned by a function won't actually change the data under the hood
     testReference();
+
+
+    //ex 3, behavior of static local varibales
+    for (int i = 0; i < 5; i++)
+    {
+        testStatic();
+    }
+
+
     return -1;
 }
 

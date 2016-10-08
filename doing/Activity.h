@@ -8,8 +8,12 @@ class Activity
 public:
     Activity(const _doing_int64 dur,
         const _doing_int64 time_stamp,
-        const std::wstring machine_name,
+        const std::wstring& machine_name,
         const ActivityKey& key);
+    Activity(const _doing_int64 dur,
+        const _doing_int64 time_stamp,
+        const std::wstring& machine_name,
+        const ActivityKey& key, bool is_active);
     virtual ~Activity();
     std::wstring GetFormattedReport() const;
     std::wstring GetKey() const;
@@ -24,6 +28,8 @@ private:
     const std::wstring _machine_name;
     //the process name
     const std::wstring _proc_name;
+    //if this is an active activity or not
+    const bool _is_active;
     //windows title
     std::wstring _window_title;
     //url 

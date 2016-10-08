@@ -12,6 +12,7 @@
 #include <thread>
 #include <chrono>
 #include "ActivityKey.h"
+#include "SimpleLogger.h"
 Doing::Doing(ConcurrentQueue<Activity>& ptr_map) : _job_queue(ptr_map)
 {
     ::CoInitialize(NULL);
@@ -24,10 +25,11 @@ void Doing::StartReportActivities() const
 void Doing::Sample()
 {
     ::CoInitialize(NULL);
-    ActivityKey prev_key;
+    ActivityKey cur_activity_key;
+    bool prev_is_active = true;
     while (true)
     {
-        ActivityKey cur_key;
+        ActivityKey next_activity_key;
         std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch());
         if (_last_time != 0)
@@ -40,38 +42,75 @@ void Doing::Sample()
                 {
                     if (!(pid == GetCurrentProcessId()))
                     {
-                        cur_key.proc_name = Win32Util<std::wstring>::GetProcName(pid);;
+                        next_activity_key.proc_name = Win32Util<std::wstring>::GetProcName(pid);;
                         //1. get key of the activity
                         std::wstring url;
-                        cur_key.window_text = Win32Util<std::wstring>::GetWindowTitleByHandle(hwnd);
-                        if (cur_key.proc_name.compare(L"chrome.exe") == 0)
+                        next_activity_key.window_text = Win32Util<std::wstring>::GetWindowTitleByHandle(hwnd);
+                        if (next_activity_key.proc_name.compare(L"chrome.exe") == 0)
                         {
-                            cur_key.url = ReportUrlByHandle(hwnd);
+                            next_activity_key.url = ReportUrlByHandle(hwnd);
                         }
 
                         //creates key internally
                         //as of this step, the internal data members should all be set
-                        cur_key.GenerateKey();
+                        next_activity_key.GenerateKey();
 
-                        if (prev_key.IsEmpty()) // first time
+                        if (cur_activity_key.IsEmpty()) // first time
                         {
-                            prev_key = cur_key; //copy constructor
+                            cur_activity_key = next_activity_key; //copy constructor
                         }
                         else
                         {
-                            //if this is still the same activity, increase the duration
-                            _acitive_duration += ms.count() - _last_time;
-                            if (cur_key != prev_key) //only when activity changes do we generate a activity
+                            _acitive_duration += ms.count() - _last_time;//if this is still the same activity, increase the duration
+                            bool cur_is_active = prev_is_active; 
+                            try
+                            {
+                                cur_is_active = (GetTickCount() - GetLastInputTime()) < 120000;
+                                //debug purpose
+                                if (cur_is_active != prev_is_active)
+                                {
+                                    wprintf(L"activity %s activeness changed from %d to %d\n",next_activity_key.GetKey().c_str(), prev_is_active,cur_is_active);
+                                    //SimpleLogger::GetInstance().WriteLogMessage(LOGGER_LEVEL::INFO_LVL,);
+                                }
+                            }
+                            catch (const std::exception& e)
+                            {
+                                std::string s = e.what();
+                                //ya lazy ass. handle i18n multibyte to wide char when it breaks :P
+                                SimpleLogger::GetInstance().WriteLogMessage(LOGGER_LEVEL::ERROR_LVL, std::wstring(s.begin(), s.end()));
+                            }
+
+                            //When Activity itself has changed
+                            if (next_activity_key != cur_activity_key)                     
                             {
                                 Activity activity(_acitive_duration,
                                     ms.count(),
                                     _machine_name,
-                                    prev_key);
+                                    cur_activity_key,
+                                    cur_is_active);
                                 _job_queue.Push(activity);                                
+                                cur_activity_key = next_activity_key;
 
-                                //update the global single threaded variables
+                                //previous recording of this activity is done
+                                //now reset all bookkeeping local variables
                                 _acitive_duration = 0;
-                                prev_key = cur_key;
+                                prev_is_active = true;
+                            }
+                            else if (cur_is_active != prev_is_active)
+                            {
+                                Activity activity(_acitive_duration,
+                                    ms.count(),
+                                    _machine_name,
+                                    cur_activity_key,
+                                    //cur_is_active actually describes current activity's activeness
+                                    //prev_is_active describes the *already queued*, last acitivity
+                                    cur_is_active);
+                                _job_queue.Push(activity);
+                                prev_is_active = cur_is_active;
+                                cur_activity_key = next_activity_key;
+                                //previous recording of this activity is done
+                                //now reset all bookkeeping local variables
+                                _acitive_duration = 0;
                             }
                             
                         }
@@ -144,5 +183,34 @@ std::wstring Doing::ReportUrlByHandle(const HWND hwnd)
         }
     }
     return val_std_str;
+}
+/*
+desc:
+    Retrieves the number of milliseconds that have elapsed since the system was started, up to 49.7 day
+    since last user input
+
+ret:
+    last user input time in milis
+
+exception:
+    throw std::exception when GetLastInputInfo fails. 
+    MSDN does not mention what ERROR CODE to expect when failing though.
+    
+*/
+unsigned long long Doing::GetLastInputTime()
+{
+#ifdef _WIN32
+    LASTINPUTINFO lii;
+    //The size of the structure, in bytes. This member must be set to sizeof(LASTINPUTINFO).
+    //It's a common way for versioning in Windows API.
+    lii.cbSize = sizeof(LASTINPUTINFO);
+    if (!GetLastInputInfo(&lii))
+    {
+        throw std::exception("GetLastInputInfo failed!");
+    }
+    return lii.dwTime;
+#else   
+    return 0;
+#endif
 }
 //end of the file

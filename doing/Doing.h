@@ -22,7 +22,10 @@ private:
     std::wstring _last_metric_key;
     unsigned long long _acitive_duration = 0;
     void Sample();
-    std::wstring ReportUrlByHandle(const HWND hwnd);
+
+    //OS(specific calls)
+    static std::wstring ReportUrlByHandle(const HWND hwnd);
+    static unsigned long long GetLastInputTime();
     unsigned long long _last_time = 0;
     //machine  name
     std::wstring _machine_name;
