@@ -32,6 +32,7 @@ void Doing::Sample()
         ActivityKey next_activity_key;
         std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch());
+        unsigned long long start_time = 0; // 0 can be used to verify if start_time has been inited or not
         if (_last_time != 0)
         {
             HWND hwnd = GetForegroundWindow();
@@ -58,6 +59,7 @@ void Doing::Sample()
                         if (cur_activity_key.IsEmpty()) // first time
                         {
                             cur_activity_key = next_activity_key; //copy constructor
+                            start_time = ms.count();//init start time
                         }
                         else
                         {
@@ -84,7 +86,7 @@ void Doing::Sample()
                             if (next_activity_key != cur_activity_key)                     
                             {
                                 Activity activity(_acitive_duration,
-                                    ms.count(),
+                                    start_time,
                                     _machine_name,
                                     cur_activity_key,
                                     cur_is_active);
@@ -95,11 +97,12 @@ void Doing::Sample()
                                 //now reset all bookkeeping local variables
                                 _acitive_duration = 0;
                                 prev_is_active = true;
+                                start_time = ms.count(); //reset start time
                             }
                             else if (cur_is_active != prev_is_active)
                             {
                                 Activity activity(_acitive_duration,
-                                    ms.count(),
+                                    start_time,
                                     _machine_name,
                                     cur_activity_key,
                                     //cur_is_active actually describes current activity's activeness
@@ -111,6 +114,7 @@ void Doing::Sample()
                                 //previous recording of this activity is done
                                 //now reset all bookkeeping local variables
                                 _acitive_duration = 0;
+                                start_time = ms.count(); //reset start time
                             }
                             
                         }
