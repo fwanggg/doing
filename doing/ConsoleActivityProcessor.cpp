@@ -22,7 +22,7 @@ void ConsoleActivityProcessor::ProcessAcitivityQueue()
         {
             Activity activity = m_job_queue.GetAndPop();
             std::wstring wc_str = activity.GetFormattedReport();
-            std::wcout << wc_str << std::flush;
+            std::wcout << wc_str << std::endl << std::flush;
         }
         Sleep(500);
     }

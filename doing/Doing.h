@@ -18,6 +18,7 @@ public:
     ~Doing();
 private:
     Doing();
+    void FillActivityKey(ActivityKey& key);
     ConcurrentQueue<Activity>& _job_queue;
     std::wstring _last_metric_key;
     unsigned long long _acitive_duration = 0;

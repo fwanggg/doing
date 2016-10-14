@@ -25,125 +25,88 @@ void Doing::StartReportActivities() const
 void Doing::Sample()
 {
     ::CoInitialize(NULL);
-    ActivityKey cur_activity_key;
+    ActivityKey prev_activity_key;
     bool prev_is_active = true;
+    Activity activity;
+
     while (true)
     {
-        ActivityKey next_activity_key;
+        //cannot reuse.. suchs
         std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch());
-        unsigned long long start_time = 0; // 0 can be used to verify if start_time has been inited or not
         if (_last_time != 0)
         {
-            HWND hwnd = GetForegroundWindow();
-            DWORD pid = 0;
-            if (hwnd)
+            ActivityKey cur_activity_key;
+            //fill the activity key if we need to
+            FillActivityKey(cur_activity_key);
+
+            //activity key has been filled in. This activity is worth looking at furthur
+            if (!cur_activity_key.IsEmpty())
             {
-                if (GetWindowThreadProcessId(hwnd, &pid))
+                if (prev_activity_key.IsEmpty()) // first time
                 {
-                    if (!(pid == GetCurrentProcessId()))
-                    {
-                        next_activity_key.proc_name = Win32Util<std::wstring>::GetProcName(pid);;
-                        //1. get key of the activity
-                        std::wstring url;
-                        next_activity_key.window_text = Win32Util<std::wstring>::GetWindowTitleByHandle(hwnd);
-                        if (next_activity_key.proc_name.compare(L"chrome.exe") == 0)
-                        {
-                            next_activity_key.url = ReportUrlByHandle(hwnd);
-                        }
-
-                        //creates key internally
-                        //as of this step, the internal data members should all be set
-                        next_activity_key.GenerateKey();
-
-                        if (cur_activity_key.IsEmpty()) // first time
-                        {
-                            cur_activity_key = next_activity_key; //copy constructor
-                            start_time = ms.count();//init start time
-                        }
-                        else
-                        {
-                            _acitive_duration += ms.count() - _last_time;//if this is still the same activity, increase the duration
-                            bool cur_is_active = prev_is_active; 
-                            try
-                            {
-                                cur_is_active = (GetTickCount() - GetLastInputTime()) < 120000;
-                                //debug purpose
-                                if (cur_is_active != prev_is_active)
-                                {
-                                    wprintf(L"activity %s activeness changed from %d to %d\n",next_activity_key.GetKey().c_str(), prev_is_active,cur_is_active);
-                                    //SimpleLogger::GetInstance().WriteLogMessage(LOGGER_LEVEL::INFO_LVL,);
-                                }
-                            }
-                            catch (const std::exception& e)
-                            {
-                                std::string s = e.what();
-                                //ya lazy ass. handle i18n multibyte to wide char when it breaks :P
-                                SimpleLogger::GetInstance().WriteLogMessage(LOGGER_LEVEL::ERROR_LVL, std::wstring(s.begin(), s.end()));
-                            }
-
-                            //When Activity itself has changed
-                            if (next_activity_key != cur_activity_key)                     
-                            {
-                                Activity activity(_acitive_duration,
-                                    start_time,
-                                    _machine_name,
-                                    cur_activity_key,
-                                    cur_is_active);
-                                _job_queue.Push(activity);                                
-                                cur_activity_key = next_activity_key;
-
-                                //previous recording of this activity is done
-                                //now reset all bookkeeping local variables
-                                _acitive_duration = 0;
-                                prev_is_active = true;
-                                start_time = ms.count(); //reset start time
-                            }
-                            else if (cur_is_active != prev_is_active)
-                            {
-                                Activity activity(_acitive_duration,
-                                    start_time,
-                                    _machine_name,
-                                    cur_activity_key,
-                                    //cur_is_active actually describes current activity's activeness
-                                    //prev_is_active describes the *already queued*, last acitivity
-                                    cur_is_active);
-                                _job_queue.Push(activity);
-                                prev_is_active = cur_is_active;
-                                cur_activity_key = next_activity_key;
-                                //previous recording of this activity is done
-                                //now reset all bookkeeping local variables
-                                _acitive_duration = 0;
-                                start_time = ms.count(); //reset start time
-                            }
-                            
-                        }
-                    }
+                    prev_activity_key = cur_activity_key; // init prev_activity_key using copy ctor
+                    activity = Activity(ms.count(), //init activity with valid data for the first time
+                        _machine_name,
+                        cur_activity_key);
                 }
                 else
                 {
-                    wprintf(L"GetWindowThreadProcessId failed errcode = %d", GetLastError());
+                    activity.BumpDuration(ms.count() - _last_time);
+                    //When Activity itself has changed
+                    if (cur_activity_key != prev_activity_key)
+                    {
+                        //1. put the activity that was just finished monitoring on to the queue for furthur processing
+                        _job_queue.Push(activity);
+                        //2. set activity to the new activity
+                        activity = Activity(ms.count(),
+                            _machine_name,
+                            cur_activity_key);
+                        prev_activity_key = cur_activity_key;
+                    }
+
                 }
             }
         }
+        _last_time = ms.count();
 
-
-        //always bumps this, we are increasing this in a 500 ms 
-        {
-            _last_time = ms.count();
-        }
-        
         Sleep(500);
     }
 }
 void Doing::Monitor()
 {
-    std::thread t_sampling(&Doing::Sample,this);
+    std::thread t_sampling(&Doing::Sample, this);
     t_sampling.detach();
 }
 Doing::~Doing()
 {
     ::CoUninitialize();
+}
+void Doing::FillActivityKey(ActivityKey & key)
+{
+    HWND hwnd = GetForegroundWindow();
+    if (hwnd)
+    {
+        DWORD pid = 0;
+        if (GetWindowThreadProcessId(hwnd, &pid))
+        {
+            if (!(pid == GetCurrentProcessId()))
+            {
+                key.proc_name = Win32Util<std::wstring>::GetProcName(pid);;
+                //1. get key of the activity
+                std::wstring url;
+                key.window_text = Win32Util<std::wstring>::GetWindowTitleByHandle(hwnd);
+                if (key.proc_name.compare(L"chrome.exe") == 0)
+                {
+                    key.url = ReportUrlByHandle(hwnd);
+                }
+                key.is_active = (GetTickCount() - GetLastInputTime()) < 120000;
+                //creates key internally
+                //as of this step, the internal data members should all be set
+                key.GenerateKey();
+            }
+        }
+    }
 }
 std::wstring Doing::ReportUrlByHandle(const HWND hwnd)
 {
@@ -197,9 +160,9 @@ ret:
     last user input time in milis
 
 exception:
-    throw std::exception when GetLastInputInfo fails. 
+    throw std::exception when GetLastInputInfo fails.
     MSDN does not mention what ERROR CODE to expect when failing though.
-    
+
 */
 unsigned long long Doing::GetLastInputTime()
 {
