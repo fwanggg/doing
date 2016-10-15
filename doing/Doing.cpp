@@ -56,10 +56,6 @@ void Doing::Sample()
                     //When Activity itself has changed
                     if (cur_activity_key != prev_activity_key)
                     {
-                        //is_active is a after-fact calculation
-                        //it's extracted from current activity but need to be updated to prev activity
-                        activity.SetIsActive(still_active);
-
                         //for the sake of clean result don't process doing.exe itself
                         //1. put the activity that was just finished monitoring on to the queue for furthur processing
                         _job_queue.Push(activity);

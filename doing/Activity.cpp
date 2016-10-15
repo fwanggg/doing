@@ -10,7 +10,8 @@ Activity::Activity(
     _machine_name(machine_name),
     _proc_name(key.proc_name), //this shall not be empty and should not be empty
     _url(key.url.empty() ? L"null" : key.url),
-    _window_title(key.window_text.empty() ? L"null" : key.window_text)
+    _window_title(key.window_text.empty() ? L"null" : key.window_text),
+    _is_active(key.is_active)
 {
 }
 Activity::Activity(const Activity & another) : _machine_name(another._machine_name),
