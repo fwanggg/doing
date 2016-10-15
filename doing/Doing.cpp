@@ -39,7 +39,7 @@ void Doing::Sample()
             ActivityKey cur_activity_key;
             //fill the activity key if we need to
             FillActivityKey(cur_activity_key);
-
+            bool still_active = cur_activity_key.is_active;
             //activity key has been filled in. This activity is worth looking at furthur
             if (!cur_activity_key.IsEmpty())
             {
@@ -56,6 +56,11 @@ void Doing::Sample()
                     //When Activity itself has changed
                     if (cur_activity_key != prev_activity_key)
                     {
+                        //is_active is a after-fact calculation
+                        //it's extracted from current activity but need to be updated to prev activity
+                        activity.SetIsActive(still_active);
+
+                        //for the sake of clean result don't process doing.exe itself
                         //1. put the activity that was just finished monitoring on to the queue for furthur processing
                         _job_queue.Push(activity);
                         //2. set activity to the new activity
@@ -64,7 +69,6 @@ void Doing::Sample()
                             cur_activity_key);
                         prev_activity_key = cur_activity_key;
                     }
-
                 }
             }
         }

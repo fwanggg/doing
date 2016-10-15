@@ -28,6 +28,8 @@ private:
     static std::wstring ReportUrlByHandle(const HWND hwnd);
     static unsigned long long GetLastInputTime();
     unsigned long long _last_time = 0;
+    //activity that's idle for more than <_MAX_IDLE_TIME> will be flagged as non-active activity
+    const unsigned int _MAX_IDLE_TIME = 12000;
     //machine  name
     std::wstring _machine_name;
 };
