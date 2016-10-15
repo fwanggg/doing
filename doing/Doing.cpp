@@ -94,21 +94,19 @@ void Doing::FillActivityKey(ActivityKey & key)
         DWORD pid = 0;
         if (GetWindowThreadProcessId(hwnd, &pid))
         {
-            if (!(pid == GetCurrentProcessId()))
+            key.proc_name = Win32Util<std::wstring>::GetProcName(pid);;
+            //1. get key of the activity
+            std::wstring url;
+            key.window_text = Win32Util<std::wstring>::GetWindowTitleByHandle(hwnd);
+            if (key.proc_name.compare(L"chrome.exe") == 0)
             {
-                key.proc_name = Win32Util<std::wstring>::GetProcName(pid);;
-                //1. get key of the activity
-                std::wstring url;
-                key.window_text = Win32Util<std::wstring>::GetWindowTitleByHandle(hwnd);
-                if (key.proc_name.compare(L"chrome.exe") == 0)
-                {
-                    key.url = ReportUrlByHandle(hwnd);
-                }
-                key.is_active = (GetTickCount() - GetLastInputTime()) < 120000;
-                //creates key internally
-                //as of this step, the internal data members should all be set
-                key.GenerateKey();
+                key.url = ReportUrlByHandle(hwnd);
             }
+            //TODO: add support for edge, firefox and IE
+            key.is_active = (GetTickCount() - GetLastInputTime()) < _MAX_IDLE_TIME;
+            //creates key internally
+            //as of this step, the internal data members should all be set
+            key.GenerateKey();
         }
     }
 }
@@ -184,4 +182,4 @@ unsigned long long Doing::GetLastInputTime()
     return 0;
 #endif
 }
-//end of the file
+//end of the file   
